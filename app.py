@@ -3,18 +3,11 @@ import joblib
 import re
 import pandas as pd
 import plotly.express as px
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.metrics import confusion_matrix
 
 # ==========================================
 # 0. 網頁基本設定
 # ==========================================
 st.set_page_config(page_title="新聞真偽雙模型偵測系統", page_icon="📰", layout="wide")
-
-# 🌟 全域字體設定：確保 Matplotlib 在網頁端繪圖時中文不會變成「口口口」
-plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei', 'Arial Unicode MS', 'simhei', 'sans-serif']
-plt.rcParams['axes.unicode_minus'] = False 
 
 # ==========================================
 # 1. 載入模型與資料 (使用快取加速網頁)
@@ -38,7 +31,6 @@ def load_sample_data():
         df['Word_Count'] = df['text'].apply(lambda x: len(str(x).split()))
         return df
     except:
-        # 若找不到原始 CSV 檔，建立虛擬資料避免網頁崩潰
         return pd.DataFrame({
             'title': ['Sample News Title'] * 10,
             'text': ['Sample content...'] * 10,
@@ -127,7 +119,7 @@ with tab2:
     st.plotly_chart(fig, use_container_width=True)
 
 # ------------------------------------------
-# 分頁 3: 模型績效評估 (🌟 真實數據與雙矩陣更新區)
+# 分頁 3: 模型績效評估 (🌟 改為直接載入圖片)
 # ------------------------------------------
 with tab3:
     st.markdown("### 🏆 雙模型真實績效大比拼 (測試集驗證)")
@@ -154,38 +146,20 @@ with tab3:
     st.markdown("### 📊 混淆矩陣交叉對比 (Confusion Matrix Comparison)")
     st.caption("觀察重點：隨機森林（藍圖）相較於單一決策樹（綠圖），顯著降低了右上角『誤放假新聞 (FP)』與左下角『誤殺真新聞 (FN)』的數量。")
     
-    # 並排繪製兩張混淆矩陣圖
+    # 並排顯示兩張混淆矩陣圖片
     plot_col1, plot_col2 = st.columns(2)
     
-    # 1. 隨機森林混淆矩陣 (藍色)
     with plot_col1:
-        rf_cm_data = [[4440, 210],   # 實際假/預測假 (TN), 實際假/預測真 (FP)
-                      [186, 4144]]   # 實際真/預測假 (FN), 實際真/預測真 (TP)
-        
-        fig_rf, ax_rf = plt.subplots(figsize=(6, 4.5))
-        sns.heatmap(rf_cm_data, annot=True, fmt='d', cmap='Blues', ax=ax_rf,
-                    xticklabels=['預測: 假新聞', '預測: 真新聞'], 
-                    yticklabels=['實際: 假新聞', '實際: 真新聞'],
-                    annot_kws={"size": 13})
-        ax_rf.set_title('隨機森林 混淆矩陣 (Random Forest)', fontsize=14, pad=10)
-        ax_rf.set_ylabel('真實標籤 (Actual)', fontsize=11)
-        ax_rf.set_xlabel('預測標籤 (Predicted)', fontsize=11)
-        st.pyplot(fig_rf)
-        
-    # 2. 決策樹混淆矩陣 (綠色)
+        try:
+            st.image("rf.png", caption="隨機森林 混淆矩陣", use_container_width=True)
+        except:
+            st.warning("⚠️ 找不到 rf.png，請確認圖片已放進資料夾並上傳 GitHub！")
+            
     with plot_col2:
-        dt_cm_data = [[4186, 464],   # 實際假/預測假 (TN), 實際假/預測真 (FP)
-                      [210, 4120]]   # 實際真/預測假 (FN), 實際真/預測真 (TP)
-        
-        fig_dt, ax_dt = plt.subplots(figsize=(6, 4.5))
-        sns.heatmap(dt_cm_data, annot=True, fmt='d', cmap='Greens', ax=ax_dt,
-                    xticklabels=['預測: 假新聞', '預測: 真新聞'], 
-                    yticklabels=['實際: 假新聞', '實際: 真新聞'],
-                    annot_kws={"size": 13})
-        ax_dt.set_title('單一決策樹 混淆矩陣 (Decision Tree)', fontsize=14, pad=10)
-        ax_dt.set_ylabel('真實標籤 (Actual)', fontsize=11)
-        ax_dt.set_xlabel('預測標籤 (Predicted)', fontsize=11)
-        st.pyplot(fig_dt)
+        try:
+            st.image("dt.png", caption="單一決策樹 混淆矩陣", use_container_width=True)
+        except:
+            st.warning("⚠️ 找不到 dt.png，請確認圖片已放進資料夾並上傳 GitHub！")
 
     # 結論總結
     st.info("""
